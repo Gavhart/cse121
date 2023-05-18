@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Whack-a-Mole</title>
+  <style>
+    .game-container {
+      width: 500px;
+      height: 500px;
+      background-color: #cd7d0d;
+      position: relative;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    
+    .mole {
+      width: 75px;
+      height: 75px;
+      background-image: url('./images/mole.png'); 
+      background-size: cover;
+      position: absolute;
+      cursor: pointer;
+      transition: all 0.2s ease-out;
+    }
+
+    
+    .mole.whacked {
+      animation-name: explode;
+      animation-duration: 0.5s;
+    }
+    
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Whack-a-Mole</h1>
+  <p>Score: <span id="score">0</span></p>
+  
+  <div class="game-container" onclick="moleClickHandler(event)">
+    <script>
+      // Constants
+      const NUM_MOLES = 70;
+      const GAME_DURATION = 30; // in seconds
+      
+      // Variables
+      let score = 0;
+      let molesWhacked = 0;
+      let gameStarted = false;
+      let gameIntervalId;
+      
+      // DOM Elements
+      const scoreElement = document.getElementById('score');
+      const moleContainer = document.querySelector('.game-container');
+      
+      // Start the game
+      function startGame() {
+        if (!gameStarted) {
+          gameStarted = true;
+          score = 0;
+          molesWhacked = 0;
+          updateScore();
+          moleContainer.innerHTML = '';
+          gameIntervalId = setInterval(placeRandomMole, 1000);
+          setTimeout(endGame, GAME_DURATION * 1000);
+        }
+      }
+      
+      // End the game
+      function endGame() {
+        clearInterval(gameIntervalId);
+        gameStarted = false;
+        alert('Game over! Your score is ' + score);
+      }
+      
+      // Update the score on the page
+      function updateScore() {
+        scoreElement.textContent = score;
+      }
+      
+      // Handle mole click event
+      function moleClickHandler(event) {
+        const mole = event.target;
+        if (gameStarted && mole.classList.contains('mole') && !mole.classList.contains('whacked')) {
+          mole.classList.add('whacked');
+          score++;
+          molesWhacked++;
+          updateScore();
+          setTimeout(() => {
+            moleContainer.removeChild(mole);
+          }, 500);
+        }
+      }
+      
+      // Place a random mole on the page
+      function placeRandomMole() {
+        if (molesWhacked === NUM_MOLES) {
+          endGame();
+          return;
+        }
+        
+        const mole = document.createElement('div');
+        mole.classList.add('mole');
+        mole.style.left = getRandomPosition() + 'px';
+        mole.style.top = getRandomPosition() + 'px';
+        
+        moleContainer.appendChild(mole);
+        
+        setTimeout(() => {
+          moleContainer.removeChild(mole);
+        }, 1000); // Adjust the duration as desired (in milliseconds)
+      }
+      
+      // Get a random position within the game container
+      function getRandomPosition() {
+        const containerSize = moleContainer.getBoundingClientRect();
+        const maxPos = Math.min(containerSize.width, containerSize.height) - 50; // Subtract mole size
+        return Math.floor(Math.random() * maxPos);
+      }
+    </script>
+  </div>
+  
+  <button onclick="startGame()">Start Game</button>
+</body>
+</html>
